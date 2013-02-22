@@ -12,6 +12,10 @@
     <artifactId>resolver-internal</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <air.main.basedir>${project.parent.basedir}</air.main.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.sonatype.aether</groupId>
