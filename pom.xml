@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.airlift</groupId>
         <artifactId>airbase</artifactId>
-        <version>1</version>
+        <version>2-SNAPSHOT</version>
     </parent>
 
     <groupId>io.airlift.resolver</groupId>
@@ -27,8 +27,9 @@
         <dep.aether.version>1.13.1</dep.aether.version>
         <dep.maven.version>3.0.4</dep.maven.version>
 
-        <air.check.skip-all>true</air.check.skip-all>
-        <!--<air.check.fail-dependency>false</air.check.fail-dependency>-->
+        <air.check.skip-pmd>true</air.check.skip-pmd>
+        <air.check.fail-all>false</air.check.fail-all>
+        <air.check.fail-basic>true</air.check.fail-basic>
     </properties>
 
     <modules>
@@ -128,6 +129,13 @@
                 <groupId>org.sonatype.sisu</groupId>
                 <artifactId>sisu-guice</artifactId>
                 <version>3.1.0</version>
+                <classifier>no_aop</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>2.1</version>
             </dependency>
 
             <dependency>

@@ -12,6 +12,10 @@
     <artifactId>resolver-aether</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <air.main.basedir>${project.parent.basedir}</air.main.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.airlift.resolver</groupId>
@@ -77,6 +81,7 @@
         <dependency>
             <groupId>org.sonatype.sisu</groupId>
             <artifactId>sisu-guice</artifactId>
+            <classifier>no_aop</classifier>
         </dependency>
 
         <dependency>
