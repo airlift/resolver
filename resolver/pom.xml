@@ -54,57 +54,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.ning.maven.plugins</groupId>
-                <artifactId>maven-duplicate-finder-plugin</artifactId>
-                <configuration>
-                    <exceptions combine.children="append">
-                        <exception>
-                            <conflictingDependencies>
-                                <dependency>
-                                    <groupId>aopalliance</groupId>
-                                    <artifactId>aopalliance</artifactId>
-                                </dependency>
-                                <dependency>
-                                    <groupId>org.sonatype.sisu</groupId>
-                                    <artifactId>sisu-inject-bean</artifactId>
-                                </dependency>
-                            </conflictingDependencies>
-                            <classes>
-                                <class>org.aopalliance.aop.Advice</class>
-                                <class>org.aopalliance.aop.AspectException</class>
-                                <class>org.aopalliance.intercept.ConstructorInterceptor</class>
-                                <class>org.aopalliance.intercept.ConstructorInvocation</class>
-                                <class>org.aopalliance.intercept.Interceptor</class>
-                                <class>org.aopalliance.intercept.Invocation</class>
-                                <class>org.aopalliance.intercept.Joinpoint</class>
-                                <class>org.aopalliance.intercept.MethodInterceptor</class>
-                                <class>org.aopalliance.intercept.MethodInvocation</class>
-                            </classes>
-                        </exception>
-                        <exception>
-                            <conflictingDependencies>
-                                <dependency>
-                                    <groupId>javax.inject</groupId>
-                                    <artifactId>javax.inject</artifactId>
-                                </dependency>
-                                <dependency>
-                                    <groupId>org.sonatype.sisu</groupId>
-                                    <artifactId>sisu-inject-bean</artifactId>
-                                </dependency>
-                            </conflictingDependencies>
-                            <classes>
-                                <class>javax.inject.Inject</class>
-                                <class>javax.inject.Named</class>
-                                <class>javax.inject.Provider</class>
-                                <class>javax.inject.Qualifier</class>
-                                <class>javax.inject.Scope</class>
-                                <class>javax.inject.Singleton</class>
-                            </classes>
-                        </exception>
-                    </exceptions>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
