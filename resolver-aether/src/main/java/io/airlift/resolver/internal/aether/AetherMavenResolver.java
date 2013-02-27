@@ -40,7 +40,8 @@ import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.connector.async.AsyncRepositoryConnectorFactory;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.graph.Dependency;
-import org.sonatype.aether.repository.LocalRepository;
+import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
+import org.sonatype.aether.repository.LocalRepositoryManager;
 import org.sonatype.aether.repository.RemoteRepository;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.resolution.DependencyRequest;
@@ -78,8 +79,8 @@ public class AetherMavenResolver
 
         repositorySystemSession = new MavenRepositorySystemSession();
 
-        LocalRepository localRepo = new LocalRepository(localRepositoryDir);
-        repositorySystemSession.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(localRepo));
+        LocalRepositoryManager localRepositoryManager = new SimpleLocalRepositoryManager(localRepositoryDir);
+        repositorySystemSession.setLocalRepositoryManager(localRepositoryManager);
 
         repositorySystemSession.setTransferListener(new ConsoleTransferListener());
         repositorySystemSession.setRepositoryListener(new ConsoleRepositoryListener());
