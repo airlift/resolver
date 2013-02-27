@@ -73,6 +73,12 @@
 
             <dependency>
                 <groupId>org.sonatype.aether</groupId>
+                <artifactId>aether-impl</artifactId>
+                <version>${dep.aether.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.sonatype.aether</groupId>
                 <artifactId>aether-util</artifactId>
                 <version>${dep.aether.version}</version>
             </dependency>
