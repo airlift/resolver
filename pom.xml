@@ -32,8 +32,6 @@
     </properties>
 
     <modules>
-        <module>resolver-internal</module>
-        <module>resolver-aether</module>
         <module>resolver</module>
         <module>resolver-integration</module>
     </modules>
@@ -43,18 +41,6 @@
             <dependency>
                 <groupId>io.airlift.resolver</groupId>
                 <artifactId>resolver</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.airlift.resolver</groupId>
-                <artifactId>resolver-internal</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.airlift.resolver</groupId>
-                <artifactId>resolver-aether</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -92,6 +78,18 @@
                 <groupId>org.sonatype.aether</groupId>
                 <artifactId>aether-connector-asynchttpclient</artifactId>
                 <version>${dep.aether.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jboss.netty</groupId>
+                        <artifactId>netty</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+                <version>3.6.2.Final</version>
             </dependency>
 
             <dependency>

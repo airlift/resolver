@@ -11,11 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal.aether;
+package io.airlift.resolver;
 
 
 import com.google.common.collect.ImmutableList;
-import io.airlift.resolver.internal.MavenResolver;
+import io.airlift.resolver.internal.ConsoleRepositoryListener;
+import io.airlift.resolver.internal.ConsoleTransferListener;
+import io.airlift.resolver.internal.Slf4jLoggerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -56,19 +58,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class AetherMavenResolver
-        implements MavenResolver
+public class ArtifactResolver
 {
+    public static final String USER_LOCAL_REPO = System.getProperty("user.home") + "/.m2/repository";
+    public static final String MAVEN_CENTRAL_URI = "http://repo1.maven.org/maven2/";
+
     private final RepositorySystem repositorySystem;
     private final MavenRepositorySystemSession repositorySystemSession;
     private final List<RemoteRepository> repositories;
 
-    public AetherMavenResolver(String localRepositoryDir, String... remoteRepositoryUris)
+    public ArtifactResolver(String localRepositoryDir, String... remoteRepositoryUris)
     {
         this(localRepositoryDir, Arrays.asList(remoteRepositoryUris));
     }
 
-    public AetherMavenResolver(String localRepositoryDir, List<String> remoteRepositoryUris)
+    public ArtifactResolver(String localRepositoryDir, List<String> remoteRepositoryUris)
     {
         MavenServiceLocator locator = new MavenServiceLocator();
         locator.addService(RepositoryConnectorFactory.class, FileRepositoryConnectorFactory.class);
@@ -91,7 +95,11 @@ public class AetherMavenResolver
         this.repositories = Collections.unmodifiableList(repositories);
     }
 
-    @Override
+    public List<Artifact> resolveArtifacts(Artifact... sourceArtifacts)
+    {
+        return resolveArtifacts(Arrays.asList(sourceArtifacts));
+    }
+
     public List<Artifact> resolveArtifacts(Iterable<? extends Artifact> sourceArtifacts)
     {
         CollectRequest collectRequest = new CollectRequest();
@@ -107,7 +115,6 @@ public class AetherMavenResolver
         return resolveArtifacts(dependencyRequest);
     }
 
-    @Override
     public List<Artifact> resolvePom(File pomFile)
     {
         if (pomFile == null) {
