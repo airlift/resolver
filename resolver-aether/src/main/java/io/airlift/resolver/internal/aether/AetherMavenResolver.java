@@ -15,7 +15,6 @@ package io.airlift.resolver.internal.aether;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
 import io.airlift.resolver.internal.MavenResolver;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
@@ -28,13 +27,10 @@ import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.logging.Logger;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
@@ -203,17 +199,10 @@ public class AetherMavenResolver
 
             ContainerConfiguration cc = new DefaultContainerConfiguration()
                     .setClassWorld(classWorld)
-                    .setRealm(null).setClassPathScanning(PlexusConstants.SCANNING_INDEX)
-                    .setAutoWiring(true)
+                    .setRealm(null)
                     .setName("maven");
 
-            DefaultPlexusContainer container = new DefaultPlexusContainer(cc, new AbstractModule()
-            {
-                protected void configure()
-                {
-                    bind(ILoggerFactory.class).toInstance(LoggerFactory.getILoggerFactory());
-                }
-            });
+            DefaultPlexusContainer container = new DefaultPlexusContainer(cc);
 
             // NOTE: To avoid inconsistencies, we'll use the Thread context class loader exclusively for lookups
             container.setLookupRealm(null);

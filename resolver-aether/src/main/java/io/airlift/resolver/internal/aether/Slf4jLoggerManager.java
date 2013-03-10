@@ -65,6 +65,40 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored.
      */
+    @Override
+    public void setThreshold(String role, int threshold)
+    {
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public void setThreshold(String role, String roleHint, int threshold)
+    {
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public int getThreshold(String role)
+    {
+        return 0;
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public int getThreshold(String role, String roleHint)
+    {
+        return 0;
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
     public void returnComponentLogger(String role)
     {
     }
