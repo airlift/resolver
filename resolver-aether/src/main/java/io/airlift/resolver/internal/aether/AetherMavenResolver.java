@@ -14,6 +14,7 @@
 package io.airlift.resolver.internal.aether;
 
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import io.airlift.resolver.internal.MavenResolver;
 import org.apache.maven.artifact.repository.ArtifactRepository;
@@ -40,6 +41,7 @@ import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.connector.async.AsyncRepositoryConnectorFactory;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.graph.Dependency;
+import org.sonatype.aether.graph.Exclusion;
 import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
 import org.sonatype.aether.repository.LocalRepositoryManager;
 import org.sonatype.aether.repository.RemoteRepository;
@@ -106,25 +108,7 @@ public class AetherMavenResolver
 
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
 
-        DependencyResult dependencyResult;
-        try {
-            dependencyResult = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest);
-        }
-        catch (DependencyResolutionException e) {
-            dependencyResult = e.getResult();
-        }
-        List<ArtifactResult> artifactResults = dependencyResult.getArtifactResults();
-        List<Artifact> artifacts = new ArrayList<>(artifactResults.size());
-        for (ArtifactResult artifactResult : artifactResults) {
-            if (artifactResult.isMissing()) {
-                artifacts.add(artifactResult.getRequest().getArtifact());
-            }
-            else {
-                artifacts.add(artifactResult.getArtifact());
-            }
-        }
-
-        return Collections.unmodifiableList(artifacts);
+        return resolveArtifacts(dependencyRequest);
     }
 
     @Override
@@ -154,12 +138,62 @@ public class AetherMavenResolver
             throw new RuntimeException("Error loading pom: " + pomFile.getAbsolutePath(), e);
         }
 
-        List<Artifact> sourceArtifacts = new ArrayList<>();
+
+        Artifact rootArtifact = new DefaultArtifact(pom.getArtifact().getGroupId(),
+                pom.getArtifact().getArtifactId(),
+                pom.getArtifact().getClassifier(),
+                pom.getArtifact().getType(),
+                pom.getArtifact().getVersion(),
+                null,
+                new File(pom.getModel().getBuild().getOutputDirectory()));
+
+        CollectRequest collectRequest = new CollectRequest();
         for (org.apache.maven.model.Dependency dependency : pom.getDependencies()) {
-            Artifact artifact = new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(), dependency.getClassifier(), dependency.getType(), dependency.getVersion());
-            sourceArtifacts.add(artifact);
+            collectRequest.addDependency(toAetherDependency(dependency));
         }
-        return resolveArtifacts(sourceArtifacts);
+        for (RemoteRepository repository : pom.getRemoteProjectRepositories()) {
+            collectRequest.addRepository(repository);
+        }
+        for (RemoteRepository repository : repositories) {
+            collectRequest.addRepository(repository);
+        }
+
+        DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
+        List<Artifact> artifacts = resolveArtifacts(dependencyRequest);
+        return ImmutableList.<Artifact>builder().add(rootArtifact).addAll(artifacts).build();
+    }
+
+    private Dependency toAetherDependency(org.apache.maven.model.Dependency dependency)
+    {
+        Artifact artifact = new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(), dependency.getClassifier(), dependency.getType(), dependency.getVersion());
+        ImmutableList.Builder<Exclusion> exclusions = ImmutableList.builder();
+        for (org.apache.maven.model.Exclusion exclusion : dependency.getExclusions()) {
+            exclusions.add(new Exclusion(exclusion.getGroupId(), exclusion.getArtifactId(), null, "*"));
+        }
+        return new Dependency(artifact, dependency.getScope(), dependency.isOptional(), exclusions.build());
+    }
+
+    private List<Artifact> resolveArtifacts(DependencyRequest dependencyRequest)
+    {
+        DependencyResult dependencyResult;
+        try {
+            dependencyResult = repositorySystem.resolveDependencies(repositorySystemSession, dependencyRequest);
+        }
+        catch (DependencyResolutionException e) {
+            dependencyResult = e.getResult();
+        }
+        List<ArtifactResult> artifactResults = dependencyResult.getArtifactResults();
+        List<Artifact> artifacts = new ArrayList<>(artifactResults.size());
+        for (ArtifactResult artifactResult : artifactResults) {
+            if (artifactResult.isMissing()) {
+                artifacts.add(artifactResult.getRequest().getArtifact());
+            }
+            else {
+                artifacts.add(artifactResult.getArtifact());
+            }
+        }
+
+        return Collections.unmodifiableList(artifacts);
     }
 
     private static PlexusContainer container()
