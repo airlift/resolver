@@ -11,12 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal.aether;
+package io.airlift.resolver;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.AbstractModule;
-import io.airlift.resolver.internal.MavenResolver;
+import io.airlift.resolver.internal.ConsoleRepositoryListener;
+import io.airlift.resolver.internal.ConsoleTransferListener;
+import io.airlift.resolver.internal.Slf4jLoggerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -28,13 +29,10 @@ import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.codehaus.plexus.ContainerConfiguration;
 import org.codehaus.plexus.DefaultContainerConfiguration;
 import org.codehaus.plexus.DefaultPlexusContainer;
-import org.codehaus.plexus.PlexusConstants;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import org.codehaus.plexus.logging.Logger;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.artifact.Artifact;
 import org.sonatype.aether.collection.CollectRequest;
@@ -60,19 +58,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class AetherMavenResolver
-        implements MavenResolver
+public class ArtifactResolver
 {
+    public static final String USER_LOCAL_REPO = System.getProperty("user.home") + "/.m2/repository";
+    public static final String MAVEN_CENTRAL_URI = "http://repo1.maven.org/maven2/";
+
     private final RepositorySystem repositorySystem;
     private final MavenRepositorySystemSession repositorySystemSession;
     private final List<RemoteRepository> repositories;
 
-    public AetherMavenResolver(String localRepositoryDir, String... remoteRepositoryUris)
+    public ArtifactResolver(String localRepositoryDir, String... remoteRepositoryUris)
     {
         this(localRepositoryDir, Arrays.asList(remoteRepositoryUris));
     }
 
-    public AetherMavenResolver(String localRepositoryDir, List<String> remoteRepositoryUris)
+    public ArtifactResolver(String localRepositoryDir, List<String> remoteRepositoryUris)
     {
         MavenServiceLocator locator = new MavenServiceLocator();
         locator.addService(RepositoryConnectorFactory.class, FileRepositoryConnectorFactory.class);
@@ -95,7 +95,11 @@ public class AetherMavenResolver
         this.repositories = Collections.unmodifiableList(repositories);
     }
 
-    @Override
+    public List<Artifact> resolveArtifacts(Artifact... sourceArtifacts)
+    {
+        return resolveArtifacts(Arrays.asList(sourceArtifacts));
+    }
+
     public List<Artifact> resolveArtifacts(Iterable<? extends Artifact> sourceArtifacts)
     {
         CollectRequest collectRequest = new CollectRequest();
@@ -111,7 +115,6 @@ public class AetherMavenResolver
         return resolveArtifacts(dependencyRequest);
     }
 
-    @Override
     public List<Artifact> resolvePom(File pomFile)
     {
         if (pomFile == null) {
@@ -203,17 +206,10 @@ public class AetherMavenResolver
 
             ContainerConfiguration cc = new DefaultContainerConfiguration()
                     .setClassWorld(classWorld)
-                    .setRealm(null).setClassPathScanning(PlexusConstants.SCANNING_INDEX)
-                    .setAutoWiring(true)
+                    .setRealm(null)
                     .setName("maven");
 
-            DefaultPlexusContainer container = new DefaultPlexusContainer(cc, new AbstractModule()
-            {
-                protected void configure()
-                {
-                    bind(ILoggerFactory.class).toInstance(LoggerFactory.getILoggerFactory());
-                }
-            });
+            DefaultPlexusContainer container = new DefaultPlexusContainer(cc);
 
             // NOTE: To avoid inconsistencies, we'll use the Thread context class loader exclusively for lookups
             container.setLookupRealm(null);

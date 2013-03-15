@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal.aether;
+package io.airlift.resolver;
 
 import com.google.common.collect.ImmutableList;
 import org.sonatype.aether.artifact.Artifact;
@@ -23,17 +23,17 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.List;
 
-public class AetherMavenResolverTest
-{
-    public static final String USER_LOCAL_REPO = System.getProperty("user.home") + "/.m2/repository";
-    public static final String MAVEN_CENTRAL_URI = "http://repo1.maven.org/maven2/";
+import static io.airlift.resolver.ArtifactResolver.MAVEN_CENTRAL_URI;
+import static io.airlift.resolver.ArtifactResolver.USER_LOCAL_REPO;
 
+public class ArtifactResolverTest
+{
     @Test
     public void testResolveArtifacts()
             throws Exception
     {
-        AetherMavenResolver aetherMavenResolver = new AetherMavenResolver(USER_LOCAL_REPO, MAVEN_CENTRAL_URI);
-        List<Artifact> artifacts = aetherMavenResolver.resolveArtifacts(ImmutableList.of(new DefaultArtifact("org.apache.maven:maven-core:3.0.4")));
+        ArtifactResolver artifactResolver = new ArtifactResolver(USER_LOCAL_REPO, MAVEN_CENTRAL_URI);
+        List<Artifact> artifacts = artifactResolver.resolveArtifacts(ImmutableList.of(new DefaultArtifact("org.apache.maven:maven-core:3.0.4")));
 
         Assert.assertNotNull(artifacts, "artifacts is null");
         for (Artifact artifact : artifacts) {
@@ -48,8 +48,8 @@ public class AetherMavenResolverTest
         File pomFile = new File("src/test/poms/maven-core-3.0.4.pom");
         Assert.assertTrue(pomFile.canRead());
 
-        AetherMavenResolver aetherMavenResolver = new AetherMavenResolver(USER_LOCAL_REPO, MAVEN_CENTRAL_URI);
-        List<Artifact> artifacts = aetherMavenResolver.resolvePom(pomFile);
+        ArtifactResolver artifactResolver = new ArtifactResolver(USER_LOCAL_REPO, MAVEN_CENTRAL_URI);
+        List<Artifact> artifacts = artifactResolver.resolvePom(pomFile);
 
         Assert.assertNotNull(artifacts, "artifacts is null");
         for (Artifact artifact : artifacts) {

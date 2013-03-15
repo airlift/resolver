@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.airlift.resolver.internal.aether;
+package io.airlift.resolver.internal;
 
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.LoggerManager;
@@ -61,6 +61,40 @@ public class Slf4jLoggerManager
     // Trying to give loggers back is a bad idea. Ceki said so :-)
     // notice to self: what was this method supposed to do?
     //
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public void setThreshold(String role, int threshold)
+    {
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public void setThreshold(String role, String roleHint, int threshold)
+    {
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public int getThreshold(String role)
+    {
+        return 0;
+    }
+
+    /**
+     * <b>Warning</b>: ignored.
+     */
+    @Override
+    public int getThreshold(String role, String roleHint)
+    {
+        return 0;
+    }
 
     /**
      * <b>Warning</b>: ignored.
