@@ -161,6 +161,13 @@ public class ArtifactResolver
             collectRequest.addRepository(repository);
         }
 
+        // Make sure we account for managed dependencies
+        if (pom.getDependencyManagement() != null) {
+            for (org.apache.maven.model.Dependency managedDependency : pom.getDependencyManagement().getDependencies()) {
+                collectRequest.addManagedDependency(toAetherDependency(managedDependency));
+            }
+        }
+
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
         List<Artifact> artifacts = resolveArtifacts(dependencyRequest);
         return ImmutableList.<Artifact>builder().add(rootArtifact).addAll(artifacts).build();
