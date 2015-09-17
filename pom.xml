@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.airlift</groupId>
         <artifactId>airbase</artifactId>
-        <version>5</version>
+        <version>43</version>
     </parent>
 
     <groupId>io.airlift.resolver</groupId>
@@ -26,9 +26,7 @@
         <dep.aether.version>1.13.1</dep.aether.version>
         <dep.maven.version>3.0.4</dep.maven.version>
 
-        <air.check.skip-pmd>true</air.check.skip-pmd>
-        <air.check.fail-all>false</air.check.fail-all>
-        <air.check.fail-basic>true</air.check.fail-basic>
+        <air.check.skip-extended>true</air.check.skip-extended>
     </properties>
 
     <modules>
