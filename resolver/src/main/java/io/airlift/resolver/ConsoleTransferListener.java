@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal;
+package io.airlift.resolver;
 
 import io.airlift.log.Logger;
 import org.sonatype.aether.transfer.AbstractTransferListener;
@@ -25,7 +25,7 @@ import java.util.Locale;
 /**
  * A simplistic transfer listener that logs uploads/downloads.
  */
-public class ConsoleTransferListener
+class ConsoleTransferListener
         extends AbstractTransferListener
 {
     private static final Logger log = Logger.get(ConsoleTransferListener.class);

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal;
+package io.airlift.resolver;
 
 import io.airlift.log.Logger;
 import org.sonatype.aether.AbstractRepositoryListener;
@@ -20,7 +20,7 @@ import org.sonatype.aether.RepositoryEvent;
 /**
  * A simplistic repository listener that logs events to the console.
  */
-public class ConsoleRepositoryListener
+class ConsoleRepositoryListener
         extends AbstractRepositoryListener
 {
     private static final Logger log = Logger.get(ConsoleRepositoryListener.class);

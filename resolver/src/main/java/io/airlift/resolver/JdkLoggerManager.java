@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.airlift.resolver.internal;
+package io.airlift.resolver;
 
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.LoggerManager;
@@ -28,7 +28,7 @@ import static java.util.logging.Logger.getLogger;
  * ignoring Plexus logger API parts that are not classical and probably not really used.
  * This is based on Slf4jLoggerManager by Json van Zyl.
  */
-public class JdkLoggerManager
+class JdkLoggerManager
         implements LoggerManager
 {
     @Override

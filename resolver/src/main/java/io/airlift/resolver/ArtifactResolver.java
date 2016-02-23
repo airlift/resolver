@@ -15,9 +15,6 @@ package io.airlift.resolver;
 
 
 import com.google.common.collect.ImmutableList;
-import io.airlift.resolver.internal.ConsoleRepositoryListener;
-import io.airlift.resolver.internal.ConsoleTransferListener;
-import io.airlift.resolver.internal.JdkLoggerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
