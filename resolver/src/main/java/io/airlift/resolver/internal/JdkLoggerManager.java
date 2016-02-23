@@ -20,29 +20,21 @@ package io.airlift.resolver.internal;
 
 import org.codehaus.plexus.logging.Logger;
 import org.codehaus.plexus.logging.LoggerManager;
-import org.slf4j.ILoggerFactory;
-import org.slf4j.LoggerFactory;
+
+import static java.util.logging.Logger.getLogger;
 
 /**
- * Use an SLF4J {@link org.slf4j.ILoggerFactory} as a backing for a Plexus {@link org.codehaus.plexus.logging.LoggerManager},
+ * Use JDK logging as a backing for a Plexus {@link LoggerManager},
  * ignoring Plexus logger API parts that are not classical and probably not really used.
- *
- * @author Jason van Zyl
- * @since 3.1
+ * This is based on Slf4jLoggerManager by Json van Zyl.
  */
-public class Slf4jLoggerManager
+public class JdkLoggerManager
         implements LoggerManager
 {
-    private final ILoggerFactory loggerFactory;
-
-    public Slf4jLoggerManager()
-    {
-        loggerFactory = LoggerFactory.getILoggerFactory();
-    }
-
+    @Override
     public Logger getLoggerForComponent(String role)
     {
-        return new Slf4jLogger(loggerFactory.getLogger(role));
+        return new JdkLogger(getLogger(role));
     }
 
     /**
@@ -50,17 +42,13 @@ public class Slf4jLoggerManager
      * <b>Warning</b>: this does not conform to logger name as class name convention.
      * (and what about <code>null</code> and <code>default</code> hint equivalence?)
      */
+    @Override
     public Logger getLoggerForComponent(String role, String hint)
     {
         return (null == hint
                 ? getLoggerForComponent(role)
-                : new Slf4jLogger(loggerFactory.getLogger(role + '.' + hint)));
+                : new JdkLogger(getLogger(role + '.' + hint)));
     }
-
-    //
-    // Trying to give loggers back is a bad idea. Ceki said so :-)
-    // notice to self: what was this method supposed to do?
-    //
 
     /**
      * <b>Warning</b>: ignored.
@@ -99,6 +87,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored.
      */
+    @Override
     public void returnComponentLogger(String role)
     {
     }
@@ -106,6 +95,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored.
      */
+    @Override
     public void returnComponentLogger(String role, String hint)
     {
     }
@@ -113,6 +103,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored (always return <code>0</code>).
      */
+    @Override
     public int getThreshold()
     {
         return 0;
@@ -121,6 +112,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored.
      */
+    @Override
     public void setThreshold(int threshold)
     {
     }
@@ -128,6 +120,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored.
      */
+    @Override
     public void setThresholds(int threshold)
     {
     }
@@ -135,6 +128,7 @@ public class Slf4jLoggerManager
     /**
      * <b>Warning</b>: ignored (always return <code>0</code>).
      */
+    @Override
     public int getActiveLoggerCount()
     {
         return 0;

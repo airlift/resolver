@@ -13,8 +13,7 @@
  */
 package io.airlift.resolver.internal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.airlift.log.Logger;
 import org.sonatype.aether.AbstractRepositoryListener;
 import org.sonatype.aether.RepositoryEvent;
 
@@ -24,100 +23,107 @@ import org.sonatype.aether.RepositoryEvent;
 public class ConsoleRepositoryListener
         extends AbstractRepositoryListener
 {
-    private final Logger logger;
+    private static final Logger log = Logger.get(ConsoleRepositoryListener.class);
 
-    public ConsoleRepositoryListener()
-    {
-        this(LoggerFactory.getLogger(ConsoleRepositoryListener.class));
-    }
-
-    public ConsoleRepositoryListener(Logger logger)
-    {
-        this.logger = logger;
-    }
-
+    @Override
     public void artifactDeployed(RepositoryEvent event)
     {
-        logger.debug("Deployed " + event.getArtifact() + " to " + event.getRepository());
+        log.debug("Deployed %s to %s", event.getArtifact(), event.getRepository());
     }
 
+    @Override
     public void artifactDeploying(RepositoryEvent event)
     {
-        logger.debug("Deploying " + event.getArtifact() + " to " + event.getRepository());
+        log.debug("Deploying %s to %s", event.getArtifact(), event.getRepository());
     }
 
+    @Override
     public void artifactDescriptorInvalid(RepositoryEvent event)
     {
-        logger.debug("Invalid artifact descriptor for " + event.getArtifact() + ": " + event.getException().getMessage());
+        log.debug("Invalid artifact descriptor for %s: %s", event.getArtifact(), event.getException().getMessage());
     }
 
+    @Override
     public void artifactDescriptorMissing(RepositoryEvent event)
     {
-        logger.debug("Missing artifact descriptor for " + event.getArtifact());
+        log.debug("Missing artifact descriptor for %s", event.getArtifact());
     }
 
+    @Override
     public void artifactInstalled(RepositoryEvent event)
     {
-        logger.debug("Installed " + event.getArtifact() + " to " + event.getFile());
+        log.debug("Installed %s to %s", event.getArtifact(), event.getFile());
     }
 
+    @Override
     public void artifactInstalling(RepositoryEvent event)
     {
-        logger.debug("Installing " + event.getArtifact() + " to " + event.getFile());
+        log.debug("Installing %s to %s", event.getArtifact(), event.getFile());
     }
 
+    @Override
     public void artifactResolved(RepositoryEvent event)
     {
-        logger.debug("Resolved artifact " + event.getArtifact() + " from " + event.getRepository());
+        log.debug("Resolved artifact %s from %s", event.getArtifact(), event.getRepository());
     }
 
+    @Override
     public void artifactDownloading(RepositoryEvent event)
     {
-        logger.debug("Downloading artifact " + event.getArtifact() + " from " + event.getRepository());
+        log.debug("Downloading artifact %s from %s", event.getArtifact(), event.getRepository());
     }
 
+    @Override
     public void artifactDownloaded(RepositoryEvent event)
     {
-        logger.debug("Downloaded artifact " + event.getArtifact() + " from " + event.getRepository());
+        log.debug("Downloaded artifact %s from %s", event.getArtifact(), event.getRepository());
     }
 
+    @Override
     public void artifactResolving(RepositoryEvent event)
     {
-        logger.debug("Resolving artifact " + event.getArtifact());
+        log.debug("Resolving artifact %s", event.getArtifact());
     }
 
+    @Override
     public void metadataDeployed(RepositoryEvent event)
     {
-        logger.debug("Deployed " + event.getMetadata() + " to " + event.getRepository());
+        log.debug("Deployed %s to %s", event.getMetadata(), event.getRepository());
     }
 
+    @Override
     public void metadataDeploying(RepositoryEvent event)
     {
-        logger.debug("Deploying " + event.getMetadata() + " to " + event.getRepository());
+        log.debug("Deploying %s to %s", event.getMetadata(), event.getRepository());
     }
 
+    @Override
     public void metadataInstalled(RepositoryEvent event)
     {
-        logger.debug("Installed " + event.getMetadata() + " to " + event.getFile());
+        log.debug("Installed %s to %s", event.getMetadata(), event.getFile());
     }
 
+    @Override
     public void metadataInstalling(RepositoryEvent event)
     {
-        logger.debug("Installing " + event.getMetadata() + " to " + event.getFile());
+        log.debug("Installing %s to %s", event.getMetadata(), event.getFile());
     }
 
+    @Override
     public void metadataInvalid(RepositoryEvent event)
     {
-        logger.debug("Invalid metadata " + event.getMetadata());
+        log.debug("Invalid metadata %s", event.getMetadata());
     }
 
+    @Override
     public void metadataResolved(RepositoryEvent event)
     {
-        logger.debug("Resolved metadata " + event.getMetadata() + " from " + event.getRepository());
+        log.debug("Resolved metadata %s from %s", event.getMetadata(), event.getRepository());
     }
 
+    @Override
     public void metadataResolving(RepositoryEvent event)
     {
-        logger.debug("Resolving metadata " + event.getMetadata() + " from " + event.getRepository());
+        log.debug("Resolving metadata %s from %s", event.getMetadata(), event.getRepository());
     }
 }

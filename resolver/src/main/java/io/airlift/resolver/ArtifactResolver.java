@@ -17,7 +17,7 @@ package io.airlift.resolver;
 import com.google.common.collect.ImmutableList;
 import io.airlift.resolver.internal.ConsoleRepositoryListener;
 import io.airlift.resolver.internal.ConsoleTransferListener;
-import io.airlift.resolver.internal.Slf4jLoggerManager;
+import io.airlift.resolver.internal.JdkLoggerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -221,7 +221,7 @@ public class ArtifactResolver
             // NOTE: To avoid inconsistencies, we'll use the Thread context class loader exclusively for lookups
             container.setLookupRealm(null);
 
-            container.setLoggerManager(new Slf4jLoggerManager());
+            container.setLoggerManager(new JdkLoggerManager());
             container.getLoggerManager().setThresholds(Logger.LEVEL_INFO);
 
             return container;
