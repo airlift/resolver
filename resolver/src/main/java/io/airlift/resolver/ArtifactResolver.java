@@ -74,6 +74,11 @@ public class ArtifactResolver
 
     public ArtifactResolver(String localRepositoryDir, List<String> remoteRepositoryUris)
     {
+        this(localRepositoryDir, remoteRepositoryUris, new File[0]);
+    }
+    
+    public ArtifactResolver(String localRepositoryDir, List<String> remoteRepositoryUris, File... poms)
+    {
         MavenServiceLocator locator = new MavenServiceLocator();
         locator.addService(RepositoryConnectorFactory.class, FileRepositoryConnectorFactory.class);
         locator.addService(RepositoryConnectorFactory.class, AsyncRepositoryConnectorFactory.class);
@@ -86,6 +91,10 @@ public class ArtifactResolver
 
         repositorySystemSession.setTransferListener(new ConsoleTransferListener());
         repositorySystemSession.setRepositoryListener(new ConsoleRepositoryListener());
+        if (poms != null && poms.length > 0)
+        {
+            repositorySystemSession.setWorkspaceReader(new PrestoWorkspaceReader(poms));
+        }
 
         List<RemoteRepository> repositories = new ArrayList<>(remoteRepositoryUris.size());
         int index = 0;
