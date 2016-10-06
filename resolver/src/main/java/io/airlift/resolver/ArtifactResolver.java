@@ -14,10 +14,12 @@
 package io.airlift.resolver;
 
 
-import com.google.common.collect.ImmutableList;
-import io.airlift.resolver.internal.ConsoleRepositoryListener;
-import io.airlift.resolver.internal.ConsoleTransferListener;
-import io.airlift.resolver.internal.Slf4jLoggerManager;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
@@ -52,11 +54,11 @@ import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.aether.util.artifact.JavaScopes;
 import org.sonatype.aether.util.filter.DependencyFilterUtils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+
+import io.airlift.resolver.internal.ConsoleRepositoryListener;
+import io.airlift.resolver.internal.ConsoleTransferListener;
+import io.airlift.resolver.internal.Slf4jLoggerManager;
 
 public class ArtifactResolver
 {
@@ -159,6 +161,15 @@ public class ArtifactResolver
         }
         for (RemoteRepository repository : repositories) {
             collectRequest.addRepository(repository);
+        }
+        
+        // Make sure we account for managed dependencies
+        if(pom.getDependencyManagement() != null)
+        {
+            for(org.apache.maven.model.Dependency managedDependency : pom.getDependencyManagement().getDependencies())
+            {
+                collectRequest.addManagedDependency(toAetherDependency(managedDependency));
+            }
         }
 
         // Make sure we account for managed dependencies
