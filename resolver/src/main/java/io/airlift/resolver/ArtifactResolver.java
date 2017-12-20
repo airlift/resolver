@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 public class ArtifactResolver
 {
@@ -127,6 +128,7 @@ public class ArtifactResolver
             org.apache.maven.repository.RepositorySystem lrs = container.lookup(org.apache.maven.repository.RepositorySystem.class);
             ProjectBuilder projectBuilder = container.lookup(ProjectBuilder.class);
             ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+            request.setSystemProperties(requiredSystemProperties());
             request.setRepositorySession(repositorySystemSession);
             request.setProcessPlugins(false);
             request.setLocalRepository(lrs.createDefaultLocalRepository());
@@ -171,6 +173,13 @@ public class ArtifactResolver
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
         List<Artifact> artifacts = resolveArtifacts(dependencyRequest);
         return ImmutableList.<Artifact>builder().add(rootArtifact).addAll(artifacts).build();
+    }
+
+    private Properties requiredSystemProperties()
+    {
+        Properties properties = new Properties();
+        properties.setProperty("java.version", System.getProperty("java.version"));
+        return properties;
     }
 
     private Dependency toAetherDependency(org.apache.maven.model.Dependency dependency)
