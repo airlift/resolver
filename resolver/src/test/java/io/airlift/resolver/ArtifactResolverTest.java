@@ -22,9 +22,12 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.airlift.resolver.ArtifactResolver.MAVEN_CENTRAL_URI;
 import static io.airlift.resolver.ArtifactResolver.USER_LOCAL_REPO;
+import static org.testng.Assert.assertTrue;
 
 public class ArtifactResolverTest
 {
@@ -55,5 +58,20 @@ public class ArtifactResolverTest
         for (Artifact artifact : artifacts) {
             Assert.assertNotNull(artifact.getFile(), "Artifact " + artifact + " is not resolved");
         }
+    }
+
+    @Test
+    public void testResolveSiblingModule()
+    {
+        ArtifactResolver artifactResolver = new ArtifactResolver(USER_LOCAL_REPO, MAVEN_CENTRAL_URI);
+        List<Artifact> artifacts = artifactResolver.resolvePom(new File("src/test/poms/multi-module-project/module2/pom.xml"));
+        List<File> files = artifacts.stream()
+                .map(Artifact::getFile)
+                .filter(Objects::nonNull)
+                .map(File::getAbsoluteFile)
+                .collect(toImmutableList());
+
+        assertTrue(files.contains(new File("src/test/poms/multi-module-project/module2/target/classes").getAbsoluteFile()));
+        assertTrue(files.contains(new File("src/test/poms/multi-module-project/module1/target/classes").getAbsoluteFile()));
     }
 }
