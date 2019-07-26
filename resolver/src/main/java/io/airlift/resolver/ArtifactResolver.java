@@ -13,7 +13,6 @@
  */
 package io.airlift.resolver;
 
-
 import com.google.common.collect.ImmutableList;
 import io.airlift.resolver.internal.ConsoleRepositoryListener;
 import io.airlift.resolver.internal.ConsoleTransferListener;
@@ -57,7 +56,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class ArtifactResolver
 {
@@ -122,35 +128,8 @@ public class ArtifactResolver
             throw new RuntimeException("pomFile is null");
         }
 
-        MavenProject pom;
-        try {
-            PlexusContainer container = container();
-            org.apache.maven.repository.RepositorySystem lrs = container.lookup(org.apache.maven.repository.RepositorySystem.class);
-            ProjectBuilder projectBuilder = container.lookup(ProjectBuilder.class);
-            ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
-            request.setSystemProperties(requiredSystemProperties());
-            request.setRepositorySession(repositorySystemSession);
-            request.setProcessPlugins(false);
-            request.setLocalRepository(lrs.createDefaultLocalRepository());
-            request.setRemoteRepositories(Arrays.asList(new ArtifactRepository[]{lrs.createDefaultRemoteRepository()}.clone()));
-            ProjectBuildingResult result = projectBuilder.build(pomFile, request);
-            pom = result.getProject();
-        }
-        catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException("Error loading pom: " + pomFile.getAbsolutePath(), e);
-        }
-
-
-        Artifact rootArtifact = new DefaultArtifact(pom.getArtifact().getGroupId(),
-                pom.getArtifact().getArtifactId(),
-                pom.getArtifact().getClassifier(),
-                pom.getArtifact().getType(),
-                pom.getArtifact().getVersion(),
-                null,
-                new File(pom.getModel().getBuild().getOutputDirectory()));
+        MavenProject pom = getMavenProject(pomFile);
+        Artifact rootArtifact = getProjectArtifact(pom);
 
         CollectRequest collectRequest = new CollectRequest();
         for (org.apache.maven.model.Dependency dependency : pom.getDependencies()) {
@@ -173,6 +152,38 @@ public class ArtifactResolver
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
         List<Artifact> artifacts = resolveArtifacts(dependencyRequest);
         return ImmutableList.<Artifact>builder().add(rootArtifact).addAll(artifacts).build();
+    }
+
+    private MavenProject getMavenProject(File pomFile)
+    {
+        try {
+            PlexusContainer container = container();
+            org.apache.maven.repository.RepositorySystem lrs = container.lookup(org.apache.maven.repository.RepositorySystem.class);
+            ProjectBuilder projectBuilder = container.lookup(ProjectBuilder.class);
+            ProjectBuildingRequest request = new DefaultProjectBuildingRequest();
+            request.setSystemProperties(requiredSystemProperties());
+            request.setRepositorySession(repositorySystemSession);
+            request.setProcessPlugins(false);
+            request.setLocalRepository(lrs.createDefaultLocalRepository());
+            request.setRemoteRepositories(Arrays.asList(new ArtifactRepository[] {lrs.createDefaultRemoteRepository()}.clone()));
+            ProjectBuildingResult result = projectBuilder.build(pomFile, request);
+            return result.getProject();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Error loading pom: " + pomFile.getAbsolutePath(), e);
+        }
+    }
+
+    private Artifact getProjectArtifact(MavenProject pom)
+    {
+        return new DefaultArtifact(
+                pom.getArtifact().getGroupId(),
+                pom.getArtifact().getArtifactId(),
+                pom.getArtifact().getClassifier(),
+                pom.getArtifact().getType(),
+                pom.getArtifact().getVersion(),
+                null,
+                new File(pom.getModel().getBuild().getOutputDirectory()));
     }
 
     private Properties requiredSystemProperties()
