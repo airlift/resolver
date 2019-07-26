@@ -60,9 +60,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.lang.String.format;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class ArtifactResolver
@@ -151,7 +151,15 @@ public class ArtifactResolver
 
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, DependencyFilterUtils.classpathFilter(JavaScopes.RUNTIME));
         List<Artifact> artifacts = resolveArtifacts(dependencyRequest);
-        return ImmutableList.<Artifact>builder().add(rootArtifact).addAll(artifacts).build();
+
+        Map<String, Artifact> modules = getSiblingModules(pom).stream()
+                .collect(toMap(ArtifactResolver::getArtifactKey, identity()));
+
+        return Stream.concat(
+                Stream.of(rootArtifact),
+                artifacts.stream()
+                        .map(artifact -> modules.getOrDefault(getArtifactKey(artifact), artifact)))
+                .collect(toImmutableList());
     }
 
     private MavenProject getMavenProject(File pomFile)
@@ -184,6 +192,32 @@ public class ArtifactResolver
                 pom.getArtifact().getVersion(),
                 null,
                 new File(pom.getModel().getBuild().getOutputDirectory()));
+    }
+
+    private List<Artifact> getSiblingModules(MavenProject module)
+    {
+        if (!module.hasParent() || module.getParentFile() == null) {
+            return ImmutableList.of();
+        }
+
+        // Parent exists and is a project reactor
+        MavenProject parent = module.getParent();
+        String parentDir = module.getParentFile().getParent();
+
+        return parent.getModules().stream()
+                .map(moduleName -> new File(parentDir, moduleName + "/pom.xml"))
+                .filter(File::isFile)
+                .map(this::getMavenProject)
+                .map(this::getProjectArtifact)
+                .collect(toImmutableList());
+    }
+
+    /**
+     * Returns a string identifying artifact by its maven coordinates.
+     */
+    private static String getArtifactKey(Artifact artifact)
+    {
+        return format("%s:%s:%s:%s", artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier());
     }
 
     private Properties requiredSystemProperties()
