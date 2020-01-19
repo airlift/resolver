@@ -14,6 +14,7 @@
 package io.airlift.resolver;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.airlift.resolver.internal.ConsoleRepositoryListener;
 import io.airlift.resolver.internal.ConsoleTransferListener;
 import io.airlift.resolver.internal.Slf4jLoggerManager;
@@ -58,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -68,7 +70,13 @@ import static java.util.stream.Collectors.toMap;
 public class ArtifactResolver
 {
     public static final String USER_LOCAL_REPO = System.getProperty("user.home") + "/.m2/repository";
-    public static final String MAVEN_CENTRAL_URI = "http://repo1.maven.org/maven2/";
+    public static final String MAVEN_CENTRAL_URI = "https://repo1.maven.org/maven2/";
+    public static final Set<String> DEPRECATED_MAVEN_CENTRAL_URIS = ImmutableSet.<String>builder()
+            .add("http://repo1.maven.org/maven2")
+            .add("http://repo1.maven.org/maven2/")
+            .add("http://repo.maven.apache.org/maven2")
+            .add("http://repo.maven.apache.org/maven2/")
+            .build();
 
     private final RepositorySystem repositorySystem;
     private final MavenRepositorySystemSession repositorySystemSession;
@@ -114,6 +122,10 @@ public class ArtifactResolver
             collectRequest.addDependency(new Dependency(sourceArtifact, JavaScopes.RUNTIME));
         }
         for (RemoteRepository repository : repositories) {
+            // Hack: avoid using deprecated Maven Central URLs
+            if (DEPRECATED_MAVEN_CENTRAL_URIS.contains(repository.getUrl())) {
+                repository = new RemoteRepository(repository.getId(), repository.getContentType(), MAVEN_CENTRAL_URI);
+            }
             collectRequest.addRepository(repository);
         }
 
@@ -135,12 +147,23 @@ public class ArtifactResolver
         for (org.apache.maven.model.Dependency dependency : pom.getDependencies()) {
             collectRequest.addDependency(toAetherDependency(dependency));
         }
+
+        // Hack: avoid using deprecated Maven Central URLs. The Central Repository no longer supports insecure
+        // communication over plain HTTP.
+        ImmutableList.Builder<RemoteRepository> allRepositories = ImmutableList.builder();
         for (RemoteRepository repository : pom.getRemoteProjectRepositories()) {
-            collectRequest.addRepository(repository);
+            if (DEPRECATED_MAVEN_CENTRAL_URIS.contains(repository.getUrl())) {
+                repository = new RemoteRepository(repository.getId(), repository.getContentType(), MAVEN_CENTRAL_URI);
+            }
+            allRepositories.add(repository);
         }
         for (RemoteRepository repository : repositories) {
-            collectRequest.addRepository(repository);
+            if (DEPRECATED_MAVEN_CENTRAL_URIS.contains(repository.getUrl())) {
+                repository = new RemoteRepository(repository.getId(), repository.getContentType(), MAVEN_CENTRAL_URI);
+            }
+            allRepositories.add(repository);
         }
+        collectRequest.setRepositories(allRepositories.build());
 
         // Make sure we account for managed dependencies
         if (pom.getDependencyManagement() != null) {
