@@ -24,7 +24,7 @@
 
     <properties>
         <dep.aether.version>1.13.1</dep.aether.version>
-        <dep.maven.version>3.0.4</dep.maven.version>
+        <dep.maven.version>3.6.1</dep.maven.version>
 
         <air.check.skip-extended>true</air.check.skip-extended>
     </properties>
