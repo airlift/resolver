@@ -11,10 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.airlift.resolver.internal;
+package io.airlift.resolver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.airlift.log.Logger;
 import org.sonatype.aether.transfer.AbstractTransferListener;
 import org.sonatype.aether.transfer.TransferEvent;
 import org.sonatype.aether.transfer.TransferResource;
@@ -26,27 +25,17 @@ import java.util.Locale;
 /**
  * A simplistic transfer listener that logs uploads/downloads.
  */
-public class ConsoleTransferListener
+class ConsoleTransferListener
         extends AbstractTransferListener
 {
-    private final Logger logger;
-
-    public ConsoleTransferListener()
-    {
-        this(LoggerFactory.getLogger(ConsoleTransferListener.class));
-    }
-
-    public ConsoleTransferListener(Logger logger)
-    {
-        this.logger = logger;
-    }
+    private static final Logger log = Logger.get(ConsoleTransferListener.class);
 
     @Override
     public void transferInitiated(TransferEvent event)
     {
         String message = event.getRequestType() == TransferEvent.RequestType.PUT ? "Uploading" : "Downloading";
 
-        logger.debug(message + ": " + event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
+        log.debug("%s: %s%s", message, event.getResource().getRepositoryUrl(), event.getResource().getResourceName());
     }
 
     @Override
@@ -71,19 +60,20 @@ public class ConsoleTransferListener
                 throughput = " at " + format.format(kbPerSec) + " KB/sec";
             }
 
-            logger.debug(type + ": " + resource.getRepositoryUrl() + resource.getResourceName() + " (" + len + throughput + ")");
+            log.debug("%s: %s%s (%s%s)", type, resource.getRepositoryUrl(), resource.getResourceName(), len, throughput);
         }
     }
 
     @Override
     public void transferFailed(TransferEvent event)
     {
-        logger.debug("transfer failed", event.getException());
+        log.debug(event.getException(), "Transfer failed");
     }
 
+    @Override
     public void transferCorrupted(TransferEvent event)
     {
-        logger.debug("transfer corrupted", event.getException());
+        log.debug(event.getException(), "Transfer corrupted");
     }
 
     protected long toKB(long bytes)
