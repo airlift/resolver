@@ -154,13 +154,14 @@ public class ArtifactResolver
         // Hack: avoid using deprecated Maven Central URLs. The Central Repository no longer supports insecure
         // communication over plain HTTP.
         ImmutableList.Builder<RemoteRepository> allRepositories = ImmutableList.builder();
-        for (RemoteRepository repository : pom.getRemoteProjectRepositories()) {
+        // Ensure that custom repositories are used first.
+        for (RemoteRepository repository : repositories) {
             if (DEPRECATED_MAVEN_CENTRAL_URIS.contains(repository.getUrl())) {
                 repository = new RemoteRepository(repository.getId(), repository.getContentType(), MAVEN_CENTRAL_URI);
             }
             allRepositories.add(repository);
         }
-        for (RemoteRepository repository : repositories) {
+        for (RemoteRepository repository : pom.getRemoteProjectRepositories()) {
             if (DEPRECATED_MAVEN_CENTRAL_URIS.contains(repository.getUrl())) {
                 repository = new RemoteRepository(repository.getId(), repository.getContentType(), MAVEN_CENTRAL_URI);
             }
