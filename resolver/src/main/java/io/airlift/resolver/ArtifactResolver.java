@@ -19,6 +19,7 @@ import io.airlift.resolver.internal.ConsoleRepositoryListener;
 import io.airlift.resolver.internal.ConsoleTransferListener;
 import io.airlift.resolver.internal.Slf4jLoggerManager;
 import org.apache.maven.artifact.repository.ArtifactRepository;
+import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy;
 import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuilder;
@@ -43,6 +44,7 @@ import org.sonatype.aether.graph.Exclusion;
 import org.sonatype.aether.impl.internal.SimpleLocalRepositoryManager;
 import org.sonatype.aether.repository.LocalRepositoryManager;
 import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.repository.RepositoryPolicy;
 import org.sonatype.aether.resolution.ArtifactResult;
 import org.sonatype.aether.resolution.DependencyRequest;
 import org.sonatype.aether.resolution.DependencyResolutionException;
@@ -60,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -195,8 +198,21 @@ public class ArtifactResolver
             request.setSystemProperties(requiredSystemProperties());
             request.setRepositorySession(repositorySystemSession);
             request.setProcessPlugins(false);
-            request.setLocalRepository(lrs.createDefaultLocalRepository());
-            request.setRemoteRepositories(Arrays.asList(new ArtifactRepository[] {lrs.createDefaultRemoteRepository()}.clone()));
+            request.setLocalRepository(lrs.createLocalRepository(repositorySystemSession.getLocalRepository().getBasedir()));
+            List<ArtifactRepository> remoteRepositories = repositories.stream()
+                    .map(repo->{
+                        RepositoryPolicy snp = repo.getPolicy(true);
+                        RepositoryPolicy rel = repo.getPolicy(false);
+
+                        return lrs.createArtifactRepository(
+                                repo.getId(),
+                                repo.getUrl(),
+                                null,
+                                new ArtifactRepositoryPolicy(snp.isEnabled(),snp.getUpdatePolicy(),snp.getChecksumPolicy()),
+                                new ArtifactRepositoryPolicy(rel.isEnabled(),rel.getUpdatePolicy(),rel.getChecksumPolicy()));
+                    })
+                    .collect(Collectors.toList());
+            request.setRemoteRepositories(remoteRepositories);
             ProjectBuildingResult result = projectBuilder.build(pomFile, request);
             return result.getProject();
         }
