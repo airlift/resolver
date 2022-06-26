@@ -255,7 +255,7 @@ public class ArtifactResolver
         Artifact artifact = new DefaultArtifact(dependency.getGroupId(), dependency.getArtifactId(), dependency.getClassifier(), dependency.getType(), dependency.getVersion());
         ImmutableList.Builder<Exclusion> exclusions = ImmutableList.builder();
         for (org.apache.maven.model.Exclusion exclusion : dependency.getExclusions()) {
-            exclusions.add(new Exclusion(exclusion.getGroupId(), exclusion.getArtifactId(), null, "*"));
+            exclusions.add(new Exclusion(exclusion.getGroupId(), exclusion.getArtifactId(), "*", "*"));
         }
         return new Dependency(artifact, dependency.getScope(), dependency.isOptional(), exclusions.build());
     }
