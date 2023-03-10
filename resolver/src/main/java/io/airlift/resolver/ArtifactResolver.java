@@ -190,7 +190,7 @@ public class ArtifactResolver
 
     private MavenProject getMavenProject(File pomFile)
     {
-        // TODO: move off Plexus DI, use Sisu instead
+        // TODO: move off deprecated org.apache.maven.repository.RepositorySystem (impl is in maven2 compat module)
         try {
             PlexusContainer container = container();
             org.apache.maven.repository.RepositorySystem lrs = container.lookup(org.apache.maven.repository.RepositorySystem.class);
@@ -289,6 +289,7 @@ public class ArtifactResolver
 
     private static PlexusContainer container()
     {
+        // TODO: move off Plexus DI, use Sisu instead
         try {
             ClassWorld classWorld = new ClassWorld("plexus.core", Thread.currentThread().getContextClassLoader());
 
