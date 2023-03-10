@@ -13,7 +13,8 @@
  */
 package io.airlift.resolver;
 
-import org.sonatype.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 
 import java.io.File;
 import java.util.ArrayList;
