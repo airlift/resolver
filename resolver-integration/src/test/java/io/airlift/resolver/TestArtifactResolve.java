@@ -13,7 +13,8 @@
  */
 package io.airlift.resolver;
 
-import org.sonatype.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
